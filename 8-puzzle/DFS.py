@@ -15,8 +15,9 @@ def search(state, goal_state):
             if child.map not in explored:
                 stack.append(child)
                 explored.add(child.map)
-        expanded_states = [cur_node.state]
-        for parent in cur_node.ancestors():
-            expanded_states.append(parent.state)
-        expanded_states.reverse()
-        return expanded_states
+    expanded_states = [cur_node.state]
+    for parent in cur_node.ancestors():
+        expanded_states.append(parent.state)
+    expanded_states.reverse()
+    return expanded_states
+

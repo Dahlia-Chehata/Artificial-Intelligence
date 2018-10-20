@@ -20,11 +20,12 @@ class Node:
 
     # compute g(n) of the node
     def compute_cost(self):
-        costs = self.cost
-        for parent in self.ancestors():
-            costs += parent.cost
-        return costs
-
+        # costs = self.cost
+        # for parent in self.ancestors():
+        #     costs += parent.cost
+        # return costs
+        return self.cost
+        
     # compare every square tile in the current board state with those ih the goal state
     def is_goal(self, goal_state):
         for i in range(len(self.state)):
