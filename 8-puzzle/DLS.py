@@ -17,7 +17,7 @@ def search(initial_state, goal_state, limit):
                     stack.append(child)
                     explored.add(child.map)
         if not cur_node.is_goal(goal_state):
-            return None
+            raise Exception(" Goal not found at depth" + limit)
         expanded_states = [cur_node.state]
         for parent in cur_node.ancestors():
             expanded_states.append(parent.state)
