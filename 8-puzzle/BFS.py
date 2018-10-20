@@ -6,10 +6,11 @@ def search(state, goal_state):
     cur_node = Node(state)
     explored = set()
     queue = deque([cur_node])
-    while not queue:
+    while len(queue) != 0:
         cur_node = queue.popleft()
         explored.add(cur_node.map)
         if cur_node.is_goal(goal_state):
+            print(cur_node.state)
             break
         cur_node.expand()
         for child in cur_node.children:
