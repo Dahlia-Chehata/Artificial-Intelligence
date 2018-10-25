@@ -17,10 +17,12 @@ def search(state, goal_state, heuristic_type):
             for j in range(len(node.state)):
                 tile_i, tile_j = tiles_indices[node.state[i][j]][1]
                 if i != tile_i or j != tile_j:
-                    if heuristic_type == "Manhattan":
+                    if heuristic_type == "Manhattan Distance":
                         cost += abs(tile_i - i) + abs(tile_j - j)
                     elif heuristic_type == "Euclidean Distance":
                         cost += math.sqrt((tile_i - i) * (tile_i - i) + (tile_j - j) * (tile_j - j))
+                    elif heuristic_type == "Misplaced Tiles":
+                        cost += 1
                     else:
                         raise "Not supported heuristic"
         return cost

@@ -5,6 +5,7 @@ def search(state, goal_state):
     cur_node = Node(state)
     explored = set()
     stack = list([cur_node])
+    counter = 0
     while stack:
         cur_node = stack.pop()
         explored.add(cur_node.map)
@@ -15,9 +16,13 @@ def search(state, goal_state):
             if child.map not in explored:
                 stack.append(child)
                 explored.add(child.map)
+        counter += 1
+        if counter%100 == 0:
+            yield [0, cur_node.state]
+
     expanded_states = [cur_node.state]
     for parent in cur_node.ancestors():
         expanded_states.append(parent.state)
     expanded_states.reverse()
-    return expanded_states
 
+    yield [1, cur_node.state, expanded_states, counter]
