@@ -24,9 +24,74 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QLabel
 from PyQt5 import QtGui, QtCore
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 from time import sleep
 
 perfectState = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+costs = []
+times = []
+nodes_number = []
+depth = []
+search_methods = ["A* Manhattan Distance", "A* Euclidean Distance", "A* Misplaced Tiles", "BFS", "DFS", "UCS"]
+
+
+class MatplotlibWidget(QWidget):
+    def __init__(self, parent=None):
+        super(MatplotlibWidget, self).__init__(parent)
+
+        self.figure = Figure()
+        self.canvas = FigureCanvasQTAgg(self.figure)
+
+        self.axis = self.figure.add_subplot(111)
+
+        self.layoutVertical = QVBoxLayout(self)#QVBoxLayout
+        self.layoutVertical.addWidget(self.canvas)
+
+class ThreadSample(QtCore.QThread):
+    newSample = QtCore.pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        super(ThreadSample, self).__init__(parent)
+
+    def run(self):
+        randomSample = random.sample(range(0, 10), 10)
+        self.newSample.emit(randomSample)
+
+class MyWindow(QWidget):
+    def __init__(self, parent=None):
+        super(MyWindow, self).__init__(parent)
+
+        self.pushButtonPlot = QPushButton(self)
+        self.pushButtonPlot.setText("Plot")
+        self.pushButtonPlot.clicked.connect(self.on_pushButtonPlot_clicked)
+
+        self.matplotlibWidget = MatplotlibWidget(self)
+
+        self.layoutVertical = QVBoxLayout(self)
+        self.layoutVertical.addWidget(self.pushButtonPlot)
+        self.layoutVertical.addWidget(self.matplotlibWidget)
+
+        self.threadSample = ThreadSample(self)
+        self.threadSample.newSample.connect(self.on_threadSample_newSample)
+        self.threadSample.finished.connect(self.on_threadSample_finished)
+
+    @QtCore.pyqtSlot()
+    def on_pushButtonPlot_clicked(self):
+        self.samples = 0
+        self.matplotlibWidget.axis.clear()
+        self.threadSample.start()
+
+    @QtCore.pyqtSlot(list)
+    def on_threadSample_newSample(self, sample):
+        self.matplotlibWidget.axis.plot(sample)
+        self.matplotlibWidget.canvas.draw()
+
+    @QtCore.pyqtSlot()
+    def on_threadSample_finished(self):
+        self.samples += 1
+        if self.samples <= 2:
+            self.threadSample.start()
 
 
 class ProgressBar(QProgressBar):
@@ -66,17 +131,16 @@ class GUI:
         self.cellsInput = [QLineEdit(str(e % 9)) for e in range(1, 10)]
         self.solveButton = QPushButton("Solve")
         self.randomButton = QPushButton("Random")
+        self.plotButton = QPushButton("Plot")
         self.mainLabel = QLabel("Welcome ....")
         self.solutionTabs = QTabWidget()
         self.progressBar = ProgressBar()
         self.solutionTabsDict = {}
         self.currentSearch = None
         self.solutionTabActive = False
-
         self.timer = QTimer()
         self.timers = [QTimer() for e in range(100)]
         self.currentTimer = 0
-
         self.savedCellsInput = []
         self.startTime = None
 
@@ -84,8 +148,9 @@ class GUI:
         for i in range(0, 3):
             for j in range(0, 3):
                 self.cellsGrid.addWidget(self.cellsInput[i * 3 + j], i + 1, j + 1)
-        self.cellsGrid.addWidget(self.solveButton, 5, 3)
+        self.cellsGrid.addWidget(self.solveButton, 5, 2)
         self.cellsGrid.addWidget(self.randomButton, 5, 1)
+        self.cellsGrid.addWidget(self.plotButton, 5, 3)
 
     def displayWindow(self):
 
@@ -107,6 +172,8 @@ class GUI:
         # signals connections
         self.randomButton.clicked.connect(self.randomButtonAction)
         self.solveButton.clicked.connect(self.solveButtonAction)
+        self.plotButton.clicked.connect(self.plotButtonAction)
+
         sys.exit(self.app.exec_())
 
     def cellsInputToState(self):
@@ -165,6 +232,11 @@ class GUI:
     def assignListOfCells(self, toList, fromList):
         for i in range(len(toList)):
             toList[i].setText(fromList[i].text())
+
+    def plotButtonAction(self):
+        self.plot = MyWindow()
+        self.plot.resize(666,333)
+        self.plot.show()
 
     def solveButtonAction(self):
 
@@ -233,9 +305,8 @@ class GUI:
     #     self.startTime = time.time()
     #     self.startSearch(IDS.search, {'initial_state': self.cellsInputToState(), 'goal_state': perfectState}, "IDS")
 
-
     def startAStarManh(self):
-        #self.setMainLabel("A* Manhattan searching .....")
+        # self.setMainLabel("A* Manhattan searching .....")
         self.progressBar.setText("A* Manhattan searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
@@ -246,7 +317,7 @@ class GUI:
                          "A* Manhattan Distance")
 
     def startAStarEuc(self):
-        #self.setMainLabel("A* Euclidean Distance searching .....")
+        # self.setMainLabel("A* Euclidean Distance searching .....")
         self.progressBar.setText("A* Euclidean Distance searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
@@ -255,7 +326,7 @@ class GUI:
                                         'heuristic_type': 'Euclidean Distance'}, "A* Euclidean Distance")
 
     def startAStarMisPlacedTiles(self):
-        #self.setMainLabel("A* Euclidean Distance searching .....")
+        # self.setMainLabel("A* Euclidean Distance searching .....")
         self.progressBar.setText("A* Euclidean Distance searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
@@ -315,7 +386,9 @@ class GUI:
                                   "Consumed Time is : \t" + str(
                                       round((time.time() - self.startTime), 3)) + " seconds.\n")
                 self.addLineInTab(self.currentSearch, "Taken Path is : \n")
-
+                costs.append(len(step[2]))
+                nodes_number.append(step[3])
+                times.append(round((time.time() - self.startTime), 3))
                 counter = 0
                 flag = 0
                 path = ""
@@ -341,6 +414,10 @@ class GUI:
                 self.timers[self.currentTimer].start(0)
             break
         self.window.repaint()
+        costs.clear()
+        nodes_number.clear()
+        times.clear()
+        depth.clear()
 
 
 if __name__ == '__main__':
