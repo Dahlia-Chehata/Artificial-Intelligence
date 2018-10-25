@@ -24,7 +24,7 @@ def search(state, goal_state, heuristic_type):
                     elif heuristic_type == "Misplaced Tiles":
                         cost += 1
                     else:
-                        raise "Not supported heuristic"
+                        raise Exception("Not supported heuristic")
         return cost
 
     def f(node):

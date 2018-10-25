@@ -203,8 +203,7 @@ class GUI:
     def doneSearch(self):
         self.timers[self.currentTimer].stop()
         self.progressBar.setText("Searching Done")
-        self.progressBar.autoFillBackground()
-       # self.setMainLabel("Searching done.")
+        self.progressBar.setRange(0, 1)
 
     def startBFS(self):
         self.progressBar.setText("BFS searching")
