@@ -4,7 +4,7 @@ from Node import Node
 
 
 
-def search(state, goal_state, heuristic):
+def search(state, goal_state, heuristic, yield_after):
     cur_node = Node(state)
     frontier = [(heuristic(cur_node), 0, cur_node)]
 
@@ -18,10 +18,12 @@ def search(state, goal_state, heuristic):
 
     index = 1
     counter = 0
+    depth = 1
     while frontier:
 
         # get the highest priority
         cur_node = heapq.heappop(frontier)[2]
+        depth = max(depth, cur_node.depth)
 
         # if already visited, then continue
         if cur_node.map in explored_set:
@@ -49,10 +51,10 @@ def search(state, goal_state, heuristic):
                 heapq.heappush(frontier, item)
                 index += 1
         counter += 1
-        if counter % 100 == 0:
+        if counter % yield_after == 0:
             yield [0, cur_node.state]
     expanded_states = [cur_node.state]
     for parent in cur_node.ancestors():
         expanded_states.append(parent.state)
     expanded_states.reverse()
-    yield [1, cur_node.state, expanded_states, counter]
+    yield [1, cur_node.state, expanded_states, counter, depth+1]

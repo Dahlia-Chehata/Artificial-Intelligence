@@ -48,50 +48,88 @@ class MatplotlibWidget(QWidget):
         self.layoutVertical = QVBoxLayout(self)#QVBoxLayout
         self.layoutVertical.addWidget(self.canvas)
 
-class ThreadSample(QtCore.QThread):
-    newSample = QtCore.pyqtSignal(list)
+# class ThreadSample(QtCore.QThread):
+#     newSample = QtCore.pyqtSignal(list)
 
-    def __init__(self, parent=None):
-        super(ThreadSample, self).__init__(parent)
+#     def __init__(self, parent=None):
+#         super(ThreadSample, self).__init__(parent)
 
-    def run(self):
-        randomSample = random.sample(range(0, 10), 10)
-        self.newSample.emit(randomSample)
+#     def run(self):
+#         self.newSample.emit(costs)
 
 class MyWindow(QWidget):
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
 
-        self.pushButtonPlot = QPushButton(self)
-        self.pushButtonPlot.setText("Plot")
-        self.pushButtonPlot.clicked.connect(self.on_pushButtonPlot_clicked)
+        self.costPushButtonPlot = QPushButton(self)
+        self.costPushButtonPlot.setText("Plot Costs")
+        self.costPushButtonPlot.clicked.connect(self.costPushButtonPlot_action)
+
+        self.timesPushButtonPlot = QPushButton(self)
+        self.timesPushButtonPlot.setText("Plot Consumed Time")
+        self.timesPushButtonPlot.clicked.connect(self.timesPushButtonPlot_action)
+
+        self.nodesPushButtonPlot = QPushButton(self)
+        self.nodesPushButtonPlot.setText("Plot Visited Nodes")
+        self.nodesPushButtonPlot.clicked.connect(self.nodesPushButtonPlot_action)
+
+        self.depthPushButtonPlot = QPushButton(self)
+        self.depthPushButtonPlot.setText("Plot Maximum depth")
+        self.depthPushButtonPlot.clicked.connect(self.depthPushButtonPlot_action)
 
         self.matplotlibWidget = MatplotlibWidget(self)
 
+        self.GUIObject = None
+        self.mainLabel = QLabel("Plot the search results.")
+
         self.layoutVertical = QVBoxLayout(self)
-        self.layoutVertical.addWidget(self.pushButtonPlot)
+        self.layoutVertical.addWidget(self.mainLabel)
+        self.layoutVertical.addWidget(self.costPushButtonPlot)
+        self.layoutVertical.addWidget(self.timesPushButtonPlot)
+        self.layoutVertical.addWidget(self.nodesPushButtonPlot)
+        self.layoutVertical.addWidget(self.depthPushButtonPlot)
         self.layoutVertical.addWidget(self.matplotlibWidget)
 
-        self.threadSample = ThreadSample(self)
-        self.threadSample.newSample.connect(self.on_threadSample_newSample)
-        self.threadSample.finished.connect(self.on_threadSample_finished)
 
-    @QtCore.pyqtSlot()
-    def on_pushButtonPlot_clicked(self):
-        self.samples = 0
+        #self.threadSample = ThreadSample(self)
+        # self.threadSample.newSample.connect(self.on_threadSample_newSample)
+
+
+    def setGUI(self, _GUIObject):
+        self.GUIObject = _GUIObject;
+
+    def display(self, sample):
+        
+        if self.GUIObject.serachStatus == True:
+            self.mainLabel.setText("Can't plot in middle of searching.")
+            return
+
+        if self.GUIObject.numOfSearchs == 0:
+            self.mainLabel.setText("No search was done to be plotted.")
+            return
+
+        self.mainLabel.setText("Plot the search results.")
         self.matplotlibWidget.axis.clear()
-        self.threadSample.start()
-
-    @QtCore.pyqtSlot(list)
-    def on_threadSample_newSample(self, sample):
-        self.matplotlibWidget.axis.plot(sample)
+        self.matplotlibWidget.axis.plot(search_methods, sample)
         self.matplotlibWidget.canvas.draw()
 
-    @QtCore.pyqtSlot()
-    def on_threadSample_finished(self):
-        self.samples += 1
-        if self.samples <= 2:
-            self.threadSample.start()
+    def costPushButtonPlot_action(self):
+        self.display(costs)
+
+    def timesPushButtonPlot_action(self):
+        self.display(times)
+
+    def nodesPushButtonPlot_action(self):
+        self.display(nodes_number)
+
+    def depthPushButtonPlot_action(self):
+        self.display(depth)
+
+    # @QtCore.pyqtSlot(list)
+    # def on_threadSample_newSample(self, sample):
+    #     self.matplotlibWidget.axis.plot(sample)
+    #     self.matplotlibWidget.canvas.draw()
+
 
 
 class ProgressBar(QProgressBar):
@@ -132,6 +170,7 @@ class GUI:
         self.solveButton = QPushButton("Solve")
         self.randomButton = QPushButton("Random")
         self.plotButton = QPushButton("Plot")
+        self.slowMotionButton = QPushButton("Slow Motion")
         self.mainLabel = QLabel("Welcome ....")
         self.solutionTabs = QTabWidget()
         self.progressBar = ProgressBar()
@@ -144,6 +183,14 @@ class GUI:
         self.savedCellsInput = []
         self.startTime = None
 
+        #keep track of number of searchs performed and if we are currently in one or not
+        self.serachStatus = False
+        self.numOfSearchs = 0
+
+        #how fast should the search go?
+        self.timerInterval = 0
+        self.searchYield = 100
+
     def constructGrid(self):
         for i in range(0, 3):
             for j in range(0, 3):
@@ -151,6 +198,7 @@ class GUI:
         self.cellsGrid.addWidget(self.solveButton, 5, 2)
         self.cellsGrid.addWidget(self.randomButton, 5, 1)
         self.cellsGrid.addWidget(self.plotButton, 5, 3)
+        self.cellsGrid.addWidget(self.slowMotionButton, 6, 2)
 
     def displayWindow(self):
 
@@ -171,8 +219,9 @@ class GUI:
 
         # signals connections
         self.randomButton.clicked.connect(self.randomButtonAction)
-        self.solveButton.clicked.connect(self.solveButtonAction)
+        self.solveButton.clicked.connect(self.solveButtonActionFast)
         self.plotButton.clicked.connect(self.plotButtonAction)
+        self.slowMotionButton.clicked.connect(self.solveButtonActionSlow)
 
         sys.exit(self.app.exec_())
 
@@ -235,10 +284,26 @@ class GUI:
 
     def plotButtonAction(self):
         self.plot = MyWindow()
-        self.plot.resize(666,333)
+        self.plot.setGUI(self)
+        self.plot.resize(666,600)
         self.plot.show()
 
+    def solveButtonActionFast(self):
+        if self.serachStatus == True:   return
+        self.timerInterval = 0
+        self.searchYield = 100
+        return self.solveButtonAction()
+
+    def solveButtonActionSlow(self):
+        if self.serachStatus == True:   return
+        self.timerInterval = 1000
+        self.searchYield = 1
+        return self.solveButtonAction()
+
     def solveButtonAction(self):
+
+        #mark the start of a new search
+        self.serachStatus = True
 
         self.progressBar.setRange(0, 0)
         if not self.validInput:
@@ -269,6 +334,12 @@ class GUI:
         self.timers[5].timeout.connect(self.startUCS)
         self.timers[6].timeout.connect(self.doneSearch)
 
+        #clear prev search
+        costs.clear()
+        nodes_number.clear()
+        times.clear()
+        depth.clear()
+
         # start the sequence of searches
         self.timers[self.currentTimer].start(0)
 
@@ -276,27 +347,29 @@ class GUI:
         self.timers[self.currentTimer].stop()
         self.progressBar.setText("Searching Done")
         self.progressBar.setRange(0, 1)
+        self.serachStatus = False
+        self.numOfSearchs += 1
 
     def startBFS(self):
         self.progressBar.setText("BFS searching")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
         self.startTime = time.time()
-        self.startSearch(BFS.search, {'state': self.cellsInputToState(), 'goal_state': perfectState}, "BFS")
+        self.startSearch(BFS.search, {'yield_after' : self.searchYield, 'state': self.cellsInputToState(), 'goal_state': perfectState}, "BFS")
 
     def startDFS(self):
         self.progressBar.setText("DFS searching")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
         self.startTime = time.time()
-        self.startSearch(DFS.search, {'state': self.cellsInputToState(), 'goal_state': perfectState}, "DFS")
+        self.startSearch(DFS.search, {'yield_after' : self.searchYield, 'state': self.cellsInputToState(), 'goal_state': perfectState}, "DFS")
 
     def startUCS(self):
         self.progressBar.setText("UCS searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
         self.startTime = time.time()
-        self.startSearch(UCS.search, {'initial_state': self.cellsInputToState(), 'goal_state': perfectState}, "UCS")
+        self.startSearch(UCS.search, {'yield_after' : self.searchYield, 'initial_state': self.cellsInputToState(), 'goal_state': perfectState}, "UCS")
 
     # def startIDS(self):
     #     self.setMainLabel("IDS searching .....")
@@ -312,7 +385,7 @@ class GUI:
         self.timers[self.currentTimer].stop()
         self.startTime = time.time()
         self.startSearch(Astar.search,
-                         {'state': self.cellsInputToState(), 'goal_state': perfectState,
+                         {'yield_after' : self.searchYield, 'state': self.cellsInputToState(), 'goal_state': perfectState,
                           'heuristic_type': 'Manhattan Distance'},
                          "A* Manhattan Distance")
 
@@ -322,7 +395,7 @@ class GUI:
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
         self.startTime = time.time()
-        self.startSearch(Astar.search, {'state': self.cellsInputToState(), 'goal_state': perfectState,
+        self.startSearch(Astar.search, {'yield_after' : self.searchYield, 'state': self.cellsInputToState(), 'goal_state': perfectState,
                                         'heuristic_type': 'Euclidean Distance'}, "A* Euclidean Distance")
 
     def startAStarMisPlacedTiles(self):
@@ -331,7 +404,7 @@ class GUI:
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
         self.startTime = time.time()
-        self.startSearch(Astar.search, {'state': self.cellsInputToState(), 'goal_state': perfectState,
+        self.startSearch(Astar.search, {'yield_after' : self.searchYield, 'state': self.cellsInputToState(), 'goal_state': perfectState,
                                         'heuristic_type': 'Misplaced Tiles'}, "A* Misplaced Tiles")
 
     def startSearch(self, searchFunction, functionParameters, searchName):
@@ -342,12 +415,12 @@ class GUI:
         # start the search
         self.timer = QTimer()
         self.timer.timeout.connect(self.change)
-        self.timer.start(0)
+        self.timer.start(self.timerInterval)
 
     def addTabInResults(self, title):
         scrollArea = QScrollArea()
         label = QLabel("")
-        newfont = QFont("Times", 10, QFont.Bold)
+        newfont = QFont("Times", 14, QFont.Bold)
         label.setFont(newfont)
         scrollArea.setWidget(label)
         self.solutionTabsDict[title] = label
@@ -382,6 +455,7 @@ class GUI:
                 # print data to GUI
                 self.addLineInTab(self.currentSearch, "Total cost is : \t\t" + str(len(step[2])) + " move.\n")
                 self.addLineInTab(self.currentSearch, "Total visited nodes is : \t" + str(step[3]) + " nodes.\n")
+                self.addLineInTab(self.currentSearch, "Max Depth is : \t" + str(step[4]) + " levels.\n")
                 self.addLineInTab(self.currentSearch,
                                   "Consumed Time is : \t" + str(
                                       round((time.time() - self.startTime), 3)) + " seconds.\n")
@@ -389,6 +463,7 @@ class GUI:
                 costs.append(len(step[2]))
                 nodes_number.append(step[3])
                 times.append(round((time.time() - self.startTime), 3))
+                depth.append(step[4])
                 counter = 0
                 flag = 0
                 path = ""
@@ -414,10 +489,6 @@ class GUI:
                 self.timers[self.currentTimer].start(0)
             break
         self.window.repaint()
-        costs.clear()
-        nodes_number.clear()
-        times.clear()
-        depth.clear()
 
 
 if __name__ == '__main__':

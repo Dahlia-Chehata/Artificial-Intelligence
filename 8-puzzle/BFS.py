@@ -2,7 +2,7 @@ from Node import Node
 from collections import deque
 
 
-def search(state, goal_state):
+def search(state, goal_state, yield_after):
     cur_node = Node(state)
     explored = set()
     queue = deque([cur_node])
@@ -18,11 +18,11 @@ def search(state, goal_state):
                 queue.append(child)
                 explored.add(child.map)
         counter += 1
-        if counter%100 == 0:
+        if counter%yield_after == 0:
             yield [0, cur_node.state]
 
     expanded_states = [cur_node.state]
     for parent in cur_node.ancestors():
         expanded_states.append(parent.state)
     expanded_states.reverse()
-    yield [1, cur_node.state, expanded_states, counter]
+    yield [1, cur_node.state, expanded_states, counter, cur_node.depth+1]

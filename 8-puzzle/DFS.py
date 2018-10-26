@@ -1,13 +1,16 @@
 from Node import Node
 
 
-def search(state, goal_state):
+def search(state, goal_state, yield_after):
     cur_node = Node(state)
     explored = set()
     stack = list([cur_node])
     counter = 0
+    depth = 1
     while stack:
         cur_node = stack.pop()
+        depth = max(depth, cur_node.depth)
+
         explored.add(cur_node.map)
         if cur_node.is_goal(goal_state):
             break
@@ -17,7 +20,7 @@ def search(state, goal_state):
                 stack.append(child)
                 explored.add(child.map)
         counter += 1
-        if counter%100 == 0:
+        if counter%yield_after == 0:
             yield [0, cur_node.state]
 
     expanded_states = [cur_node.state]
@@ -25,4 +28,4 @@ def search(state, goal_state):
         expanded_states.append(parent.state)
     expanded_states.reverse()
 
-    yield [1, cur_node.state, expanded_states, counter]
+    yield [1, cur_node.state, expanded_states, counter, depth+1]

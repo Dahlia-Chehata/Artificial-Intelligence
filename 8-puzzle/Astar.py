@@ -3,7 +3,7 @@ import heapq
 import math
 
 
-def search(state, goal_state, heuristic_type):
+def search(state, goal_state, heuristic_type, yield_after):
     def g(node):
         return node.compute_cost()
     tiles_indices = []
@@ -29,4 +29,4 @@ def search(state, goal_state, heuristic_type):
 
     def f(node):
         return g(node) + h(node)
-    return Greedy_best_first.search(state, goal_state, f)
+    return Greedy_best_first.search(state, goal_state, f, yield_after)
