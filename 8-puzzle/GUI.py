@@ -45,17 +45,9 @@ class MatplotlibWidget(QWidget):
 
         self.axis = self.figure.add_subplot(111)
 
-        self.layoutVertical = QVBoxLayout(self)#QVBoxLayout
+        self.layoutVertical = QVBoxLayout(self)
         self.layoutVertical.addWidget(self.canvas)
 
-# class ThreadSample(QtCore.QThread):
-#     newSample = QtCore.pyqtSignal(list)
-
-#     def __init__(self, parent=None):
-#         super(ThreadSample, self).__init__(parent)
-
-#     def run(self):
-#         self.newSample.emit(costs)
 
 class MyWindow(QWidget):
     def __init__(self, parent=None):
@@ -100,7 +92,7 @@ class MyWindow(QWidget):
 
     def display(self, sample):
         
-        if self.GUIObject.serachStatus == True:
+        if self.GUIObject.serachStatus:
             self.mainLabel.setText("Can't plot in middle of searching.")
             return
 
@@ -125,12 +117,6 @@ class MyWindow(QWidget):
     def depthPushButtonPlot_action(self):
         self.display(depth)
 
-    # @QtCore.pyqtSlot(list)
-    # def on_threadSample_newSample(self, sample):
-    #     self.matplotlibWidget.axis.plot(sample)
-    #     self.matplotlibWidget.canvas.draw()
-
-
 
 class ProgressBar(QProgressBar):
 
@@ -144,9 +130,8 @@ class ProgressBar(QProgressBar):
         self.style = ''' 
                         QProgressBar
                         {
-                            border: 2px solid grey;
-                        border - radius: 5
-                        px;
+                        border: 2px solid grey;
+                        border - radius: 5 px;
                         text - align: center;
                         }
                         '''
@@ -172,6 +157,18 @@ class GUI:
         self.plotButton = QPushButton("Plot")
         self.slowMotionButton = QPushButton("Slow Motion")
         self.mainLabel = QLabel("Welcome ....")
+        self.scroll_style = '''
+                       QAbstractScrollArea
+                       {
+                        background-color: black;
+                        color: black;
+                        }
+                       QWidget#scrollAreaWidgetContents{
+                         background-color: black; /*or a colour*/
+                         color: black;
+                        }
+                       '''
+
         self.solutionTabs = QTabWidget()
         self.progressBar = ProgressBar()
         self.solutionTabsDict = {}
@@ -183,11 +180,11 @@ class GUI:
         self.savedCellsInput = []
         self.startTime = None
 
-        #keep track of number of searchs performed and if we are currently in one or not
+        # keep track of number of searches performed and if we are currently in one or not
         self.serachStatus = False
         self.numOfSearchs = 0
 
-        #how fast should the search go?
+        # how fast should the search go?
         self.timerInterval = 0
         self.searchYield = 100
 
@@ -263,11 +260,11 @@ class GUI:
             if cell.text() in nums:
                 self.setMainLabel("Can't insert duplicated entries.")
                 return False
-            if Utilities.represents_int(cell.text()) == False:
+            if not Utilities.represents_int(cell.text()):
                 self.setMainLabel("Entries must be integers.")
                 return False
             nums.add(cell.text())
-        if Utilities.is_solvable_puzzle(self.cellsInputToState()) == False:
+        if not Utilities.is_solvable_puzzle(self.cellsInputToState()):
             self.setMainLabel("This board is un-solvable.")
             return False
         return True
@@ -289,13 +286,15 @@ class GUI:
         self.plot.show()
 
     def solveButtonActionFast(self):
-        if self.serachStatus == True:   return
+        if self.serachStatus:
+            return
         self.timerInterval = 0
         self.searchYield = 100
         return self.solveButtonAction()
 
     def solveButtonActionSlow(self):
-        if self.serachStatus == True:   return
+        if self.serachStatus:
+            return
         self.timerInterval = 1000
         self.searchYield = 1
         return self.solveButtonAction()
@@ -310,7 +309,7 @@ class GUI:
             return
 
         # show the result tabs if not shown
-        if self.solutionTabActive == False:
+        if not self.solutionTabActive:
             self.window.setGeometry(300, 150, 400, 600)
             self.mainGrid.addWidget(self.solutionTabs)
             self.solutionTabActive = True
@@ -334,7 +333,7 @@ class GUI:
         self.timers[5].timeout.connect(self.startUCS)
         self.timers[6].timeout.connect(self.doneSearch)
 
-        #clear prev search
+        # clear prev search
         costs.clear()
         nodes_number.clear()
         times.clear()
@@ -390,7 +389,6 @@ class GUI:
                          "A* Manhattan Distance")
 
     def startAStarEuc(self):
-        # self.setMainLabel("A* Euclidean Distance searching .....")
         self.progressBar.setText("A* Euclidean Distance searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
@@ -399,7 +397,6 @@ class GUI:
                                         'heuristic_type': 'Euclidean Distance'}, "A* Euclidean Distance")
 
     def startAStarMisPlacedTiles(self):
-        # self.setMainLabel("A* Euclidean Distance searching .....")
         self.progressBar.setText("A* Euclidean Distance searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
@@ -420,14 +417,14 @@ class GUI:
     def addTabInResults(self, title):
         scrollArea = QScrollArea()
         label = QLabel("")
-        newfont = QFont("Times", 14, QFont.Bold)
+        newfont = QFont("Georgian",10,QFont.Bold)
         label.setFont(newfont)
         scrollArea.setWidget(label)
         self.solutionTabsDict[title] = label
         self.solutionTabs.addTab(scrollArea, title)
 
     def addLineInTab(self, tabTitle, data):
-        self.solutionTabsDict[tabTitle].setText(self.solutionTabsDict[tabTitle].text() + "\n " + data)
+        self.solutionTabsDict[tabTitle].setText(self.solutionTabsDict[tabTitle].text() + "\n" + data)
         self.solutionTabsDict[tabTitle].adjustSize()
 
     def stateToAscii(self, state):
@@ -435,12 +432,10 @@ class GUI:
         table = BeautifulTable()
         for row in state:
             for cell in row:
-                if cell != 0:
-                    rows.append(" " + str(cell) + " ")
-                else:
-                    rows.append("   ")
+                rows.append(str(cell))
             table.append_row(rows)
             rows.clear()
+
         return table.__str__()
 
     def change(self):
@@ -453,9 +448,9 @@ class GUI:
                 self.timer.stop()
 
                 # print data to GUI
-                self.addLineInTab(self.currentSearch, "Total cost is : \t\t" + str(len(step[2])) + " move.\n")
+                self.addLineInTab(self.currentSearch, "Total cost is : \t\t" + str(len(step[2])) + " moves.\n")
                 self.addLineInTab(self.currentSearch, "Total visited nodes is : \t" + str(step[3]) + " nodes.\n")
-                self.addLineInTab(self.currentSearch, "Max Depth is : \t" + str(step[4]) + " levels.\n")
+                self.addLineInTab(self.currentSearch, "Max Depth is : \t\t" + str(step[4]) + " levels.\n")
                 self.addLineInTab(self.currentSearch,
                                   "Consumed Time is : \t" + str(
                                       round((time.time() - self.startTime), 3)) + " seconds.\n")
@@ -470,19 +465,21 @@ class GUI:
                 for state in step[2]:
                     if counter == 100: break
                     counter += 1
-                    string = self.stateToAscii(state)
-                    pat = re.compile(r"([|])")
+                    string = self.stateToAscii(state).strip()
+                    pat = re.compile(r"([+|123456780])")
 
                     if flag == 1:
                         right = re.sub("\n", "\n\t\t\t\t", string)
-                        path += pat.sub(" \\1 ", right)
+                        temp = re.sub("0", "    ", right)
+                        path += pat.sub(" \\1 ",temp)
                         path += str("\n\t\t\t<---\n")
                         flag = 0
                     else:
-                        path += pat.sub(" \\1 ", string)
-                        path += str("\t\t--->\t")
+                        temp = re.sub("0", "    ", string)
+                        path += pat.sub(" \\1 ", temp)
+                        path += str("\t--->\t")
                         flag = 1
-                self.addLineInTab(self.currentSearch, path)
+                self.addLineInTab(self.currentSearch, path+"  SOLVED !\n")
 
                 # run the next timer
                 self.currentTimer += 1
