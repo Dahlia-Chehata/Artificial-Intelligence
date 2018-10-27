@@ -11,7 +11,7 @@ def search(initial_state, goal_state, limit, yield_after, counter):
         cur_node = queue.popleft()
 
         if cur_node.depth >= limit:
-            continue;
+            continue
 
         depth = max(depth, cur_node.depth)
         explored.add(cur_node.map)
