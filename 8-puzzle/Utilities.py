@@ -1,4 +1,6 @@
 #check if the puzzle can be solved or not
+
+
 def is_solvable_puzzle(state):
     inversions = 0
     listState = [cell for row in state for cell in row]
@@ -12,6 +14,7 @@ def is_solvable_puzzle(state):
         return True
     else:
         return False
+
 
 def represents_int(s):
     try: 

@@ -20,13 +20,13 @@ def search(initial_state, goal_state, limit, yield_after):
                 if child.map not in explored:
                     stack.append(child)
                     explored.add(child.map)
-        return None
-        counter += 1
-        if counter % yield_after == 0:
-            yield [0, cur_node.state]
-
+            counter += 1
+            if counter % yield_after == 0:
+                yield [0, cur_node.state]
     expanded_states = [cur_node.state]
     for parent in cur_node.ancestors():
         expanded_states.append(parent.state)
     expanded_states.reverse()
-    yield [1, cur_node.state, expanded_states, counter, depth+1]
+    yield [1, cur_node.state, expanded_states, counter, depth + 1]
+    if not cur_node.is_goal(goal_state):
+        return None

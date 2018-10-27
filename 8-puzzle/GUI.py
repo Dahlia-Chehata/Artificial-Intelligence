@@ -3,6 +3,7 @@ import random
 import BFS
 import DFS
 import UCS
+import IDS
 import Astar
 import Utilities
 import time
@@ -10,7 +11,7 @@ import re
 from beautifultable import BeautifulTable
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QProgressBar
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget,QErrorMessage
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QLineEdit
@@ -258,14 +259,20 @@ class GUI:
         nums = set()
         for cell in self.cellsInput:
             if cell.text() in nums:
-                self.setMainLabel("Can't insert duplicated entries.")
+                self.error_msg = QErrorMessage()
+                self.error_msg.showMessage("Can't insert duplicated entries.")
+               # self.setMainLabel("Can't insert duplicated entries.")
                 return False
             if not Utilities.represents_int(cell.text()):
-                self.setMainLabel("Entries must be integers.")
+                self.error_msg = QErrorMessage()
+                self.error_msg.showMessage("Entries must be integers.")
+                # self.setMainLabel("Entries must be integers.")
                 return False
             nums.add(cell.text())
         if not Utilities.is_solvable_puzzle(self.cellsInputToState()):
-            self.setMainLabel("This board is un-solvable.")
+            self.error_msg = QErrorMessage()
+            self.error_msg.showMessage("This board is un-solvable.")
+            # self.setMainLabel("This board is un-solvable.")
             return False
         return True
 
@@ -301,12 +308,12 @@ class GUI:
 
     def solveButtonAction(self):
 
-        #mark the start of a new search
-        self.serachStatus = True
-
         self.progressBar.setRange(0, 0)
-        if not self.validInput:
+        if not self.validInput():
             return
+
+        # mark the start of a new search
+        self.serachStatus = True
 
         # show the result tabs if not shown
         if not self.solutionTabActive:
@@ -331,7 +338,8 @@ class GUI:
         self.timers[3].timeout.connect(self.startBFS)
         self.timers[4].timeout.connect(self.startDFS)
         self.timers[5].timeout.connect(self.startUCS)
-        self.timers[6].timeout.connect(self.doneSearch)
+        self.timers[6].timeout.connect(self.startIDS)
+        self.timers[7].timeout.connect(self.doneSearch)
 
         # clear prev search
         costs.clear()
@@ -370,15 +378,14 @@ class GUI:
         self.startTime = time.time()
         self.startSearch(UCS.search, {'yield_after' : self.searchYield, 'initial_state': self.cellsInputToState(), 'goal_state': perfectState}, "UCS")
 
-    # def startIDS(self):
-    #     self.setMainLabel("IDS searching .....")
-    #     self.assignListOfCells(self.cellsInput, self.savedCellsInput)
-    #     self.timers[self.currentTimer].stop()
-    #     self.startTime = time.time()
-    #     self.startSearch(IDS.search, {'initial_state': self.cellsInputToState(), 'goal_state': perfectState}, "IDS")
+    def startIDS(self):
+        self.progressBar.setText("IDS searching .....")
+        self.assignListOfCells(self.cellsInput, self.savedCellsInput)
+        self.timers[self.currentTimer].stop()
+        self.startTime = time.time()
+        self.startSearch(IDS.search, {'yield_after' : self.searchYield,'initial_state': self.cellsInputToState(), 'goal_state': perfectState}, "IDS")
 
     def startAStarManh(self):
-        # self.setMainLabel("A* Manhattan searching .....")
         self.progressBar.setText("A* Manhattan searching .....")
         self.assignListOfCells(self.cellsInput, self.savedCellsInput)
         self.timers[self.currentTimer].stop()
