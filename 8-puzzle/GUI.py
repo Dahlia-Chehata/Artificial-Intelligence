@@ -29,7 +29,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from time import sleep
 
-perfectState = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+perfectState =  [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
 costs = []
 times = []
 nodes_number = []
@@ -152,7 +152,7 @@ class GUI:
         self.window = QWidget()
         self.mainGrid = QVBoxLayout()
         self.cellsGrid = QGridLayout()
-        self.cellsInput = [QLineEdit(str(e % 9)) for e in range(1, 10)]
+        self.cellsInput = [QLineEdit(str(e % 9)) for e in range(0, 9)]
         self.solveButton = QPushButton("Solve")
         self.randomButton = QPushButton("Random")
         self.plotButton = QPushButton("Plot")
@@ -455,8 +455,8 @@ class GUI:
                 self.timer.stop()
 
                 # print data to GUI
-                self.addLineInTab(self.currentSearch, "Total cost is : \t\t" + str(len(step[2])) + " moves.\n")
-                self.addLineInTab(self.currentSearch, "Total visited nodes is : \t" + str(step[3]) + " nodes.\n")
+                self.addLineInTab(self.currentSearch, "Total cost is : \t\t" + str(len(step[2]-1)) + " moves.\n")
+                self.addLineInTab(self.currentSearch, "Total visited nodes is : \t" + str(step[3]+1) + " nodes.\n")
                 self.addLineInTab(self.currentSearch, "Max Depth is : \t\t" + str(step[4]) + " levels.\n")
                 self.addLineInTab(self.currentSearch,
                                   "Consumed Time is : \t" + str(

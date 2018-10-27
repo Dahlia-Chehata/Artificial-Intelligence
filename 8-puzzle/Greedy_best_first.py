@@ -3,7 +3,6 @@ from Node import Node
 
 
 
-
 def search(state, goal_state, heuristic, yield_after):
     cur_node = Node(state)
     frontier = [(heuristic(cur_node), 0, cur_node)]
@@ -18,7 +17,7 @@ def search(state, goal_state, heuristic, yield_after):
 
     index = 1
     counter = 0
-    depth = 1
+    depth = 0
     while frontier:
 
         # get the highest priority

@@ -6,7 +6,7 @@ def search(state, goal_state, yield_after):
     explored = set()
     stack = list([cur_node])
     counter = 0
-    depth = 1
+    depth = 0
     while stack:
         cur_node = stack.pop()
         depth = max(depth, cur_node.depth)

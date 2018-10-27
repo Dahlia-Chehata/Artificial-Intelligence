@@ -16,7 +16,7 @@ def search(state, goal_state, heuristic_type, yield_after):
         for i in range(len(node.state)):
             for j in range(len(node.state)):
                 tile_i, tile_j = tiles_indices[node.state[i][j]][1]
-                if i != tile_i or j != tile_j:
+                if (i != tile_i or j != tile_j)and node.state[i][j] != 0:
                     if heuristic_type == "Manhattan Distance":
                         cost += abs(tile_i - i) + abs(tile_j - j)
                     elif heuristic_type == "Euclidean Distance":

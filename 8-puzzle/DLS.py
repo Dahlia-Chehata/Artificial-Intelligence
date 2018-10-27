@@ -5,12 +5,12 @@ def search(initial_state, goal_state, limit, yield_after, counter):
     cur_node = Node(initial_state)
     explored = set()
     stack = list([cur_node])
-    depth = 1
+    depth = 0
     while stack:
         cur_node = stack.pop()
 
         if cur_node.depth >= limit:
-            continue;
+            continue
 
         depth = max(depth, cur_node.depth)
         explored.add(cur_node.map)

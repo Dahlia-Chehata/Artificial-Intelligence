@@ -7,6 +7,7 @@ def search(initial_state, goal_state, yield_after):
     realTotalVisitedNodes = 0
 
     while step[0] != 1:
+        print (depth)
         sol = DLS.search(initial_state, goal_state, depth, yield_after, realTotalVisitedNodes)
         for step in sol:
             if step[0] != 1:

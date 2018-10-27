@@ -7,7 +7,7 @@ def is_solvable_puzzle(state):
     for i in range(len(listState)):
         for j in range(i+1, len(listState)):
             if listState[i] == 0 or listState[j] == 0:
-                continue;
+                continue
             if(listState[i] > listState[j]):
                 inversions += 1
     if inversions%2 == 0:
