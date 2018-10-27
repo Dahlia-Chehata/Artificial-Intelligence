@@ -34,7 +34,7 @@ costs = []
 times = []
 nodes_number = []
 depth = []
-search_methods = ["A* Manhattan Distance", "A* Euclidean Distance", "A* Misplaced Tiles", "BFS", "DFS", "UCS"]
+search_methods = ["A* Manhattan Distance", "A* Euclidean Distance", "A* Misplaced Tiles", "BFS", "DFS", "UCS", "IDS"]
 
 
 class MatplotlibWidget(QWidget):
