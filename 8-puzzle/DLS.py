@@ -1,16 +1,17 @@
 from Node import Node
+from collections import deque
 
 
 def search(initial_state, goal_state, limit, yield_after, counter):
     cur_node = Node(initial_state)
     explored = set()
-    stack = list([cur_node])
+    queue = deque([cur_node])
     depth = 0
-    while stack:
-        cur_node = stack.pop()
+    while queue:
+        cur_node = queue.popleft()
 
         if cur_node.depth >= limit:
-            continue
+            continue;
 
         depth = max(depth, cur_node.depth)
         explored.add(cur_node.map)
@@ -20,7 +21,7 @@ def search(initial_state, goal_state, limit, yield_after, counter):
         cur_node.expand()
         for child in reversed(cur_node.children):
             if child.map not in explored:
-                stack.append(child)
+                queue.append(child)
                 explored.add(child.map)
 
         counter += 1
