@@ -3,7 +3,7 @@ import random
 import maze_generator
 import MDP_state
 from time import sleep
-
+import time
 
 # Create Pen
 class Pen(turtle.Turtle):
@@ -22,6 +22,7 @@ pen = Pen()
 
 
 def animate_PI(grid, gamma):
+
     policy_changed = True
     setup_maze(grid)
     actions = ['up', 'down', 'left', 'right']
@@ -32,7 +33,10 @@ def animate_PI(grid, gamma):
                 policy[i][j] = '$'
 
     iters = 0
-    visualize_policy(policy, iters)
+    tot_time = 0
+    cost=0
+    start_time = time.time()
+    visualize_policy(policy, iters,tot_time,cost)
     sleep(1)
 
     '''Policy iteration'''
@@ -51,6 +55,7 @@ def animate_PI(grid, gamma):
                     else:
                         neighbor = getattr(grid[i][j], policy[i][j])
                         v = grid[i][j].reward + gamma * grid[neighbor[0]][neighbor[1]].value
+                        cost =v
                         # Compare to previous iteration
                         if v != grid[i][j].value:
                             is_value_changed = True
@@ -68,7 +73,8 @@ def animate_PI(grid, gamma):
                         policy[i][j] = best_action
 
         iters += 1
-        visualize_policy(policy, iters)
+        tot_time += (time.time()-start_time)
+        visualize_policy(policy, iters,tot_time,cost)
     turtle.done()
     return policy
 
@@ -90,8 +96,11 @@ def setup_maze(state):
     screen.update()
 
 
-def visualize_policy(policy, iterations):
-    pen.undo()
+def visualize_policy(policy, iterations,time,cost):
+    if cost !=0:
+       for i in range(6):
+        pen.undo()
+
     pen.shape('arrow')
     pen.ht()
     screen.tracer(0, 0)
@@ -142,8 +151,15 @@ def visualize_policy(policy, iterations):
 
     # iterations value
     pen.color('red')
-    pen.goto(-100, -250)
+    pen.goto(-90, 170)
     pen.write('Iterations: {}'.format(iterations),font=('Arial', 20, 'normal'))
+    screen.update()
+    pen.color('white')
+    pen.goto(-90, -190)
+    pen.write('Time : '+ str(round(time,5)),font=('Arial', 15, 'normal'))
+    screen.update()
+    pen.goto(-90, -220)
+    pen.write('Cost : ' + "??", font=('Arial', 15, 'normal'))
     screen.update()
 
 
