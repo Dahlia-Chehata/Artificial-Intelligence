@@ -6,6 +6,7 @@ from time import sleep
 import time
 
 # Create Pen
+
 class Pen(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
@@ -24,7 +25,7 @@ pen = Pen()
 def animate_PI(grid, gamma):
 
     policy_changed = True
-    setup_maze(grid)
+    init_maze(grid)
     actions = ['up', 'down', 'left', 'right']
     policy = [['up' for i in range(len(grid[0]))] for j in range(len(grid))]
     for i in range(len(grid)):
@@ -79,8 +80,7 @@ def animate_PI(grid, gamma):
     return policy
 
 
-def setup_maze(state):
-    pen.ht()
+def init_maze(state):
     screen.tracer(0, 0)
     for y in range(len(state)):
         for x in range(len(state[y])):
