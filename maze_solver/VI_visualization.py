@@ -7,6 +7,7 @@ import MDP_state
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+from path_handling import *
 
 class Pen(turtle.Turtle):
     def __init__(self):
@@ -147,6 +148,8 @@ if __name__ == '__main__':
 
     #maze
     random.seed(103)
-    test = maze_generator.Aldous_Broder(6, 6).generate()
+    test = maze_generator.Aldous_Broder(5, 5).generate()
     test_mdp = MDP_state.convert_to_MDP(test)
     test_policy = value_iteration(test_mdp, .9)
+    handle_path(test, test_policy, 9)
+

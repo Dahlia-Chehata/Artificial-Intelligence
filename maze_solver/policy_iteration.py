@@ -1,16 +1,8 @@
 from maze_generator import Aldous_Broder
 from MDP_state import convert_to_MDP
 import re
-
-
-def gamify_policy(policy):
-    policy_string = '\n'.join([''.join(row) for row in policy])
-    policy_string = re.sub('up', '↑', policy_string)
-    policy_string = re.sub('down', '↓', policy_string)
-    policy_string = re.sub('right', '→', policy_string)
-    policy_string = re.sub('left', '←', policy_string)
-    return policy_string
-
+import random 
+from path_handling import *
 
 def policy_iteration(grid, gamma):
 
@@ -65,6 +57,6 @@ if __name__ == '__main__':
     maze = Aldous_Broder(3, 3).generate()
     mdp = convert_to_MDP(maze)
     policy = policy_iteration(mdp, .9)
-    policy_str = gamify_policy(policy)
-    print(maze)
-    print(policy_str)
+    handle_path(maze, policy, 5)
+
+

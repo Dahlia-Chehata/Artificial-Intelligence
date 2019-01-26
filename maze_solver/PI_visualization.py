@@ -4,6 +4,8 @@ import maze_generator
 import MDP_state
 from time import sleep
 import time
+import re
+from path_handling import *
 
 # Create Pen
 
@@ -162,7 +164,6 @@ def visualize_policy(policy, iterations,time,cost):
     pen.write('Cost : ' + "??", font=('Arial', 15, 'normal'))
     screen.update()
 
-
 if __name__ == '__main__':
 
     # Set up background
@@ -190,4 +191,4 @@ if __name__ == '__main__':
     #         ['$', '$', '$', '$', '$', '$', '$', '$', '$', '$', '$', '$', '$']]
     test_mdp = MDP_state.convert_to_MDP(test)
     test_policy = animate_PI(test_mdp, .5)
-
+    handle_path(test, test_policy, 9)
