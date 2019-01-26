@@ -37,9 +37,9 @@ def animate_PI(grid, gamma):
 
     iters = 0
     tot_time = 0
-    cost=0
+    value=0
     start_time = time.time()
-    visualize_policy(policy, iters,tot_time,cost)
+    visualize_policy(policy, iters,tot_time,value)
     sleep(1)
 
     '''Policy iteration'''
@@ -58,7 +58,7 @@ def animate_PI(grid, gamma):
                     else:
                         neighbor = getattr(grid[i][j], policy[i][j])
                         v = grid[i][j].reward + gamma * grid[neighbor[0]][neighbor[1]].value
-                        cost =v
+                        value = v
                         # Compare to previous iteration
                         if v != grid[i][j].value:
                             is_value_changed = True
@@ -77,7 +77,7 @@ def animate_PI(grid, gamma):
 
         iters += 1
         tot_time += (time.time()-start_time)
-        visualize_policy(policy, iters,tot_time,cost)
+        visualize_policy(policy, iters,tot_time,value)
     turtle.done()
     return policy
 
@@ -98,8 +98,8 @@ def init_maze(state):
     screen.update()
 
 
-def visualize_policy(policy, iterations,time,cost):
-    if cost !=0:
+def visualize_policy(policy, iterations, time, Value):
+    if Value !=0:
        for i in range(6):
         pen.undo()
 
@@ -161,7 +161,7 @@ def visualize_policy(policy, iterations,time,cost):
     pen.write('Time : '+ str(round(time,5)),font=('Arial', 15, 'normal'))
     screen.update()
     pen.goto(-90, -220)
-    pen.write('Cost : ' + "??", font=('Arial', 15, 'normal'))
+    pen.write('Value : ' + str(round(Value, 5)), font=('Arial', 15, 'normal'))
     screen.update()
 
 if __name__ == '__main__':

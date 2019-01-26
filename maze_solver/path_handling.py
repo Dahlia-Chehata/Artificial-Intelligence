@@ -4,10 +4,11 @@ import random
 
 def gamify_policy(policy):
     policy_string = '\n'.join([''.join(row) for row in policy])
-    policy_string = re.sub('up', '↑', policy_string)
-    policy_string = re.sub('down', '↓', policy_string)
-    policy_string = re.sub('right', '→', policy_string)
-    policy_string = re.sub('left', '←', policy_string)
+    policy_string = re.sub(r'\$', '   $   ', policy_string)
+    policy_string = re.sub('up', '   ↑   ', policy_string)
+    policy_string = re.sub('down', '   ↓   ', policy_string)
+    policy_string = re.sub('right', '   →   ', policy_string)
+    policy_string = re.sub('left', '   ←   ', policy_string)
     return policy_string
 
 

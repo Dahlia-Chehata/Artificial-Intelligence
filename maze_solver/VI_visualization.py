@@ -5,9 +5,8 @@ from time import sleep
 import maze_generator
 import MDP_state
 import time
-import matplotlib.pyplot as plt
-import numpy as np
 from path_handling import *
+
 
 class Pen(turtle.Turtle):
     def __init__(self):
@@ -45,7 +44,7 @@ def init_maze(state):
     pen.write('Time : 0', font=('Arial', 15, 'normal'))
     screen.update()
     pen.goto(-90, -240)
-    pen.write('Cost : 0', font=('Arial', 15, 'normal'))
+    pen.write('Value : 0', font=('Arial', 15, 'normal'))
     screen.update()
 
 
@@ -55,7 +54,7 @@ def value_iteration(grid, gamma):
     init_maze(grid)
     iters = 0
     tot_time = 0
-    cost=0
+    max_Value = 0
     start_time = time.time()
     policy = [['up' for i in range(len(grid[0]))] for j in range(len(grid))]
     actions = ['up', 'down', 'left', 'right']
@@ -72,14 +71,14 @@ def value_iteration(grid, gamma):
                         neighbor = getattr(grid[i][j], a)
                         q.append(grid[i][j].reward + gamma * grid[neighbor[0]][neighbor[1]].value)
                     v = max(q)
-                    cost = v #----------------> ??
+                    max_Value = v
                     if v != grid[i][j].value:
                         value_changed = True
                         grid[i][j].value = v
 
         iters += 1
         tot_time += time.time()-start_time
-        visualize_values(grid, iters, tot_time, cost)
+        visualize_values(grid, iters, tot_time, max_Value)
     turtle.done()
 
     for i in range(len(grid)):
@@ -93,8 +92,8 @@ def value_iteration(grid, gamma):
     return policy
 
 
-def visualize_values(grid, iterations, time, cost):
-    if cost != 0:
+def visualize_values(grid, iterations, time, max_Value):
+    if max_Value != 0:
         for i in range(6):
             pen.undo()
     screen.tracer(0, 0)
@@ -128,7 +127,7 @@ def visualize_values(grid, iterations, time, cost):
     pen.write('Time : ' + str(round(time, 5)), font=('Arial', 15, 'normal'))
     screen.update()
     pen.goto(-90, -240)
-    pen.write('Cost : ' +  str(round(cost, 5)), font=('Arial', 15, 'normal'))
+    pen.write('max Value : ' + str(max_Value), font=('Arial', 15, 'normal'))
     screen.update()
 
 
